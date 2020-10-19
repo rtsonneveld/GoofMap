@@ -24,10 +24,15 @@ namespace GoofMap {
         public static Vector3 StringToVector3(string s, Loader loader, bool applyScale = true)
         {
             var split = s.Split(',');
+
+            float x = float.Parse(split[0], System.Globalization.NumberStyles.Float);
+            float y = float.Parse(split[1], System.Globalization.NumberStyles.Float);
+            float z = float.Parse(split[2], System.Globalization.NumberStyles.Float);
+
             if (applyScale) {
-                return new Vector3(float.Parse(split[0]) * loader.ScaleFactor, float.Parse(split[1]) * loader.ScaleFactor, float.Parse(split[2]) * loader.ScaleFactor);
+                return new Vector3(x * loader.ScaleFactor, y * loader.ScaleFactor, z * loader.ScaleFactor);
             } else {
-                return new Vector3(float.Parse(split[0]), float.Parse(split[1]), float.Parse(split[2]));
+                return new Vector3(x, y, z);
             }
         }
 

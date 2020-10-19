@@ -115,7 +115,7 @@ namespace GoofMap {
             objectGao.transform.parent = gameObject.transform;
             objectGao.transform.position = Util.StringToVector3(vars["pos"], loader);
 
-            float scale = float.Parse(vars["scale"]);
+            float scale = float.Parse(vars["scale"], System.Globalization.NumberStyles.Float);
             objectGao.transform.localScale = new Vector3(scale, scale, scale);
         }
 
