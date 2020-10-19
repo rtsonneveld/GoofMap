@@ -77,6 +77,7 @@ namespace GoofMap {
             triggerGao.layer = LayerMask.NameToLayer("Triggers");
             triggerGao.transform.parent = gameObject.transform;
             triggerGao.transform.position = Util.StringToVector3(vars["pos"], loader);
+            triggerGao.GetComponent<MeshRenderer>().material = loader.DefaultMaterial;
 
             if (vars["type"]=="spawn" && vars["id"]=="0") {
                 SpawnInfo info = loader.LevelSpawnInfo[levelName];
