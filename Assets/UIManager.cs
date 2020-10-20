@@ -12,13 +12,17 @@ namespace GoofMap {
 
         public Loader Loader;
         public Dropdown LevelSelectDropdown;
+        public GameObject LoadingScreen;
 
         public void OnEnable()
         {
+            LoadingScreen.SetActive(true);
+
             Loader.OnLoad += () =>
             {
                 LevelSelectDropdown.ClearOptions();
                 LevelSelectDropdown.AddOptions(Loader.LevelRoots.Keys.ToList());
+                LoadingScreen.SetActive(false);
             };
         }
 

@@ -1,6 +1,8 @@
-﻿using GoofMap.Behaviour;
+﻿using Assets.Behaviour;
+using GoofMap.Behaviour;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -108,14 +110,21 @@ namespace GoofMap {
                 objectGao = new GameObject(meshName+" (mesh not found)");
             }
 
-            if (meshName=="coin.ase") {
-                objectGao.AddComponent<CoinBehaviour>();
+            objectGao.AddComponent<GoofObject>();
+            if (vars["type"]=="collectible") {
+                objectGao.AddComponent<SpeenAnimBehaviour>();
             }
 
             objectGao.transform.parent = gameObject.transform;
             objectGao.transform.position = Util.StringToVector3(vars["pos"], loader);
+            
+            Vector3 rotEulerRadians = Util.StringToVector3(vars["rot"], loader, false);
+            rotEulerRadians.y *= -1;
+            Vector3 rotEulerDegrees = rotEulerRadians * Mathf.Rad2Deg;
 
-            float scale = float.Parse(vars["scale"], System.Globalization.NumberStyles.Float);
+            objectGao.transform.rotation = Quaternion.Euler(rotEulerDegrees);
+
+            float scale = float.Parse(vars["scale"], CultureInfo.InvariantCulture.NumberFormat);
             objectGao.transform.localScale = new Vector3(scale, scale, scale);
         }
 

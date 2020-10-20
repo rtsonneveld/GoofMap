@@ -1,7 +1,10 @@
 ﻿
+using Assets.Behaviour;
 using Assimp;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using UnityEngine;
 
@@ -25,9 +28,9 @@ namespace GoofMap {
         {
             var split = s.Split(',');
 
-            float x = float.Parse(split[0], System.Globalization.NumberStyles.Float);
-            float y = float.Parse(split[1], System.Globalization.NumberStyles.Float);
-            float z = float.Parse(split[2], System.Globalization.NumberStyles.Float);
+            float x = float.Parse(split[0], CultureInfo.InvariantCulture.NumberFormat);
+            float y = float.Parse(split[1], CultureInfo.InvariantCulture.NumberFormat);
+            float z = float.Parse(split[2], CultureInfo.InvariantCulture.NumberFormat);
 
             if (applyScale) {
                 return new Vector3(x * loader.ScaleFactor, y * loader.ScaleFactor, z * loader.ScaleFactor);
@@ -149,6 +152,17 @@ namespace GoofMap {
         public static Color AssimpToUnityColor(Color4D col)
         {
             return new Color(col.R, col.G, col.B, col.A);
+        }
+
+        public static Bounds GetBoundsIncludingChildren(GameObject gao)
+        {
+            var bounds = new Bounds(gao.transform.position, Vector3.one);
+            GoofObject[] goofObjects = gao.GetComponentsInChildren<GoofObject>();
+            foreach (GoofObject obj in goofObjects) {
+                bounds.Encapsulate(obj.bounds);
+            }
+
+            return bounds;
         }
     }
 }

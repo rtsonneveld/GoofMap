@@ -1,4 +1,5 @@
-﻿using Assimp;
+﻿using Assets.Behaviour;
+using Assimp;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -6,7 +7,9 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using UnityEngine;
+using Camera = UnityEngine.Camera;
 using Material = UnityEngine.Material;
+using Quaternion = UnityEngine.Quaternion;
 
 namespace GoofMap {
     public class Loader : MonoBehaviour {
@@ -25,11 +28,29 @@ namespace GoofMap {
         public event Action OnLoad;
 
         public GameObject ErrorMessage;
+        private string ActiveLevel;
+        public GameObject Overlay;
 
         // Start is called before the first frame update
         public void Start()
         {
             Load();
+        }
+
+        public void Update()
+        {
+            if (Input.GetKey(KeyCode.LeftControl) && Input.GetKeyDown(KeyCode.P)) {
+                StartCoroutine(TakeScreenshots());
+            }
+
+            /*
+            if (Input.GetKeyDown(KeyCode.Z)) {
+                AlignCameraIsometric(LevelRoots[ActiveLevel], 45);
+            }
+            if (Input.GetKeyDown(KeyCode.X)) {
+                AlignCameraTopDown(LevelRoots[ActiveLevel]);
+            }*/
+
         }
 
         public void Load()
@@ -136,11 +157,74 @@ namespace GoofMap {
                 g.SetActive(false);
             }
 
+            ActiveLevel = levelName;
             LevelRoots[levelName].SetActive(true);
 
             GameObject cameraGao = UnityEngine.Camera.main.gameObject;
             cameraGao.transform.position = LevelSpawnInfo[levelName].Position;
             cameraGao.transform.LookAt(LevelSpawnInfo[levelName].LookAt, Vector3.up);
+        }
+
+        public IEnumerator TakeScreenshots()
+        {
+            Overlay.SetActive(false);
+
+            foreach (string lvl in LevelRoots.Keys) {
+
+                SelectLevel(lvl);
+
+                AlignCameraTopDown(LevelRoots[lvl]);
+
+                ScreenCapture.CaptureScreenshot("screenshot_" + lvl + "_topdown.png", 2);
+                yield return new WaitForEndOfFrame();
+
+                for (int i = 45; i < 360; i+=90) {
+                    AlignCameraIsometric(LevelRoots[lvl], i);
+
+                    ScreenCapture.CaptureScreenshot("screenshot_" + lvl + "_isometric_"+i+".png", 2);
+                    yield return new WaitForEndOfFrame();
+                }
+
+            }
+
+            Overlay.SetActive(true);
+            Camera.main.orthographic = false;
+        }
+
+        private void AlignObjectsToCamera()
+        {
+            GoofObject[] objs = FindObjectsOfType<GoofObject>();
+            foreach(var obj in objs) {
+                obj.transform.rotation = Camera.main.transform.rotation;
+                obj.transform.localScale = Vector3.one * 3.0f;
+            }
+        }
+
+        private void AlignCameraTopDown(GameObject levelRoot)
+        {
+            Camera.main.orthographic = true;
+            Bounds levelBounds = Util.GetBoundsIncludingChildren(levelRoot);
+
+            Camera.main.transform.position = levelBounds.center + new Vector3(0, Camera.main.farClipPlane * 0.5f, 0);
+            Camera.main.transform.rotation = Quaternion.Euler(90, levelBounds.size.z <= levelBounds.size.x ? 90 : 0, 0);
+
+            Camera.main.orthographicSize = (levelBounds.size.z > levelBounds.size.x ? levelBounds.size.z : levelBounds.size.x) * 0.75f;
+
+            AlignObjectsToCamera();
+        }
+
+        private void AlignCameraIsometric(GameObject levelRoot, int i)
+        {
+            Camera.main.orthographic = true;
+            Bounds levelBounds = Util.GetBoundsIncludingChildren(levelRoot);
+
+            var pitch = Mathf.Rad2Deg * Mathf.Atan(Mathf.Sin(Mathf.Deg2Rad * 45));
+            Camera.main.transform.rotation = Quaternion.Euler(pitch, i, 0);
+            Camera.main.transform.position = levelBounds.center - Camera.main.transform.rotation * Vector3.forward * Camera.main.farClipPlane * 0.5f;
+
+            Camera.main.orthographicSize = (levelBounds.size.x + levelBounds.size.y + levelBounds.size.z) / 4.0f;
+
+            AlignObjectsToCamera();
         }
 
     }

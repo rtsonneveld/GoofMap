@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using UnityEngine;
 
 namespace GoofMap.Behaviour {
-    public class CoinBehaviour : MonoBehaviour{
+    public class SpeenAnimBehaviour : MonoBehaviour{
 
         public void Update()
         {
-            transform.rotation = Quaternion.Euler(0, -Time.realtimeSinceStartup * 120.0f, 0);
+            transform.rotation = transform.rotation * Quaternion.Euler(0, -Time.deltaTime * 120.0f, 0);
         }
     }
 }
